@@ -1,44 +1,30 @@
 """
 content_generator.py — the agent's only "labor."
 
-Calls the Claude API to write a short affiliate-style blog post on a
-topic. This is deliberately simple: one call in, one post out. Cost
-estimation is approximate (token count x a per-token price) — good
-enough to drive the survival mechanic, not meant to be exact billing.
+Calls the Google Gemini API (free tier, no card required) to write a
+short affiliate-style blog post on a topic. On the free tier the real
+cost is $0, but we still track a small notional cost per post so the
+survival mechanic has something to count down.
 """
 
 import os
 import re
-import anthropic
+import requests
 
-MODEL = "claude-sonnet-4-6"
+MODEL = "gemini-2.5-flash"
+API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
 
-# Rough public per-token pricing for the model above (USD). Update if
-# pricing changes — this is only used to decide how much to deduct
-# from the agent's own balance per call, not for real billing.
-PRICE_PER_INPUT_TOKEN = 3.00 / 1_000_000
-PRICE_PER_OUTPUT_TOKEN = 15.00 / 1_000_000
-
-
-def estimate_cost(usage) -> float:
-    return (
-        usage.input_tokens * PRICE_PER_INPUT_TOKEN
-        + usage.output_tokens * PRICE_PER_OUTPUT_TOKEN
-    )
+# Free tier costs $0 in real money. This is a placeholder so the
+# balance still counts down for the survival mechanic.
+NOTIONAL_COST_PER_POST = 0.01
 
 
 def generate_post(topic: str, affiliate_link: str = "", affiliate_product: str = ""):
-    """
-    Returns (title, body_markdown, cost_usd).
-    Raises if ANTHROPIC_API_KEY isn't set.
-    """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "Set ANTHROPIC_API_KEY in your environment before running the agent."
+            "Set GEMINI_API_KEY in your environment before running the agent."
         )
-
-    client = anthropic.Anthropic(api_key=api_key)
 
     affiliate_instruction = ""
     if affiliate_link and affiliate_product:
@@ -56,17 +42,19 @@ Format:
 {affiliate_instruction}
 """
 
-    response = client.messages.create(
-        model=MODEL,
-        max_tokens=1200,
-        messages=[{"role": "user", "content": prompt}],
+    resp = requests.post(
+        f"{API_URL}?key={api_key}",
+        json={"contents": [{"parts": [{"text": prompt}]}]},
+        timeout=60,
     )
+    if resp.status_code != 200:
+        raise RuntimeError(f"Gemini API error ({resp.status_code}): {resp.text}")
 
-    text = "".join(block.text for block in response.content if block.type == "text")
-    cost = estimate_cost(response.usage)
+    data = resp.json()
+    text = data["candidates"][0]["content"]["parts"][0]["text"]
 
     match = re.search(r"TITLE:\s*(.+)", text)
     title = match.group(1).strip() if match else topic
     body = re.sub(r"TITLE:\s*.+\n?", "", text, count=1).strip()
 
-    return title, body, cost
+    return title, body, NOTIONAL_COST_PER_POST
