@@ -11,7 +11,7 @@ import os
 import re
 import requests
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.6-flash"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent"
 
 # Free tier costs $0 in real money. This is a placeholder so the
