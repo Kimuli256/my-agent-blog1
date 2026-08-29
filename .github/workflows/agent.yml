@@ -3,10 +3,7 @@ name: Run Starving Agent
 on:
   schedule:
     - cron: "0 13 * * *"
-  workflow_dispatch: {}
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   run-agent:
@@ -23,21 +20,25 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Make sure the wallet exists
+      - name: Run balance check
         run: python balance.py
-
-      - name: Run the agent
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
-        run: python main.py
 
-      - name: Save the agent's updated balance
+      - name: Run agent
+        run: python main.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Commit and push changes
         run: |
-          git config user.name "starving-agent"
+          git config user.name "starving-agent-bot"
           git config user.email "actions@github.com"
           git add data/balance.json posts/ || true
-          git diff --staged --quiet || git commit -m "agent run: update balance"
-          git pull --rebase origin main
+          git pull --rebase
+          git commit -m "agent: update balance and posts" || echo "nothing to commit"
           git push
