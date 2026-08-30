@@ -1,18 +1,8 @@
-name: Akisam 
-
-on:
-  push:
-  schedule:
-    - cron: '0 * * * *'
-
-permissions:       # <--- ADD THESE TWO LINES
-  contents: write  # <--- THIS GIVES THE BOT PERMISSION TO POST FILES
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      # ... the rest of your steps ...
+- name: Run bot
+        env:8658223509:AAHbD6FUZFvpc3AMiu_mebF0pgL41PuAzs4
+          # These lines "bridge" the GitHub Secret to your Python Code
+          TELEGRAM_BOT_TOKEN: ${{ secrets.AKISAM_KIMULI }}
+          TELEGRAM_CHAT_ID: ${{ secrets. }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python main.py
