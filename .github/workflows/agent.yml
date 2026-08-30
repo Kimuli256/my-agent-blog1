@@ -1,8 +1,6 @@
-- name: Run bot
-        env:8658223509:AAHbD6FUZFvpc3AMiu_mebF0pgL41PuAzs4
-          # These lines "bridge" the GitHub Secret to your Python Code
-          TELEGRAM_BOT_TOKEN: ${{ secrets.AKISAM_KIMULI }}
-          TELEGRAM_CHAT_ID: ${{ secrets. }}
+- name: Run Bot
+        env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python main.py
