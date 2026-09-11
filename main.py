@@ -18,7 +18,7 @@ import requests
 
 from affiliates import match_affiliate
 from balance import DATA_PATH, credit, deduct, get_balance, init_wallet, is_alive
-from content_generator import generate_post
+from publisher.py import generate_post
 from publisher import publish
 from revenue import check_for_new_revenue
 
