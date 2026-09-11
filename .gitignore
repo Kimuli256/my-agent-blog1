@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local wallet and data (contains sensitive balance info)
+data/
+balance.json
+
+# Environment variables (DO NOT COMMIT)
+.env
+.env.local
+
+# Posts directory (if used locally)
+posts/
+
+# OS files
+.DS_Store
+Thumbs.db
