@@ -1,43 +1,42 @@
-name: Run Starving Agent
+name: Agent Blog Bot
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 13 * * *"
-  workflow_dispatch: {}
+    - cron: '0 10 * * *'
 
 permissions:
   contents: write
 
 jobs:
-  run-agent:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Make sure the wallet exists
-        run: python balance.py
-
-      - name: Run the agent
+      - name: Run Bot
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPO: ${{ github.repository }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python main.py
 
-      - name: Save the agent's updated balance
+      - name: Save the agent's state
         run: |
           git config user.name "starving-agent"
           git config user.email "actions@github.com"
           git add data/balance.json posts/ || true
-          git diff --staged --quiet || git commit -m "agent run: update balance"
+          git diff --staged --quiet || git commit -m "agent run: update balance/posts"
           git pull --rebase origin main
           git push
